@@ -26,23 +26,23 @@ const client = new ApolloClient({
   cache
 });
 //client has query and mutation functions to use
-client.query({//gql is for the javascript to understand graphql requests
-  //graphql query like we saw it in the playground
-  query: gql` 
-  {
-    getCollectionsByTitle(title: "hats"){
-      id
-      title
-      items {
-        id
-        name
-        imageUrl
-        price
-      }
-    }
-  }
-  `
-}).then(res => console.log(res)).catch(error => console.log(error))
+// client.query({//gql is for the javascript to understand graphql requests
+//   //graphql query like we saw it in the playground
+//   query: gql`
+//   {
+//     getCollectionsByTitle(title: "hats"){
+//       id
+//       title
+//       items {
+//         id
+//         name
+//         imageUrl
+//         price
+//       }
+//     }
+//   }
+//   `
+// }).then(res => console.log(res)).catch(error => console.log(error));
 
 ReactDOM.render(
   <ApolloProvider client={client}>
