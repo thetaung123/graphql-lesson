@@ -13,6 +13,7 @@ import { store, persistor } from './redux/store';
 
 import './index.css';
 import App from './App';
+import {resolvers, typeDefs} from "./graphql/resolvers";
 
 const httpLink = createHttpLink({
   uri: 'https://crwn-clothing.com'
@@ -22,8 +23,17 @@ const cache = new InMemoryCache(); //this stores the requested data in memory// 
 
 
 const client = new ApolloClient({
-  link: httpLink,
-  cache
+    link: httpLink,
+    cache,
+    typeDefs,
+    resolvers
+});
+
+client.writeData({
+    data: { //setting up initial data // like creating reducer //we can change this data with mutations
+        cartHidden: true,
+        cartItems: []
+    }
 });
 //client has query and mutation functions to use
 // client.query({//gql is for the javascript to understand graphql requests

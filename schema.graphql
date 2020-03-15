@@ -5,21 +5,21 @@ schema {
 }
 
 type Collection {
-    id: ID! # ! means that there will always be ID property in Collection
+    id: ID!
     items: [Item!]!
     title: String!
 }
 
 type Item {
-    collection: Collection #this is the owner of this Item type
+    collection: Collection
     id: ID!
     imageUrl: String!
     name: String!
     price: Float!
 }
 
-type Query { #you can query of collection, collections, and getCollectionByTitle
-    collection(id: ID!): Collection #because this doesn't always neccessarily returns a collection # this requests will return a data object with the property of the query name e.g getCollectionsByTitle
+type Query {
+    collection(id: ID!): Collection
     collections: [Collection!]!
     getCollectionsByTitle(title: String): Collection
 }
