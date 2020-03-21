@@ -3,14 +3,23 @@ import {addItemToCart, getCartItemCount, getCartTotal, removeItemFromCart} from 
 
 export const typeDefs = gql` # we're defining the mutation type we want to use
     extend type Item { # item query is already exists ,so, this won't create a new one like below
-        quantitiy: Int,  #integer value
+        quantitiy: Int  #integer value
     }
+
+    extend type User {
+        id: ID!
+        displayName: String!
+        email: String!
+        createdAt: DateTime!
+    }
+
     extend type Mutation { # this means that we want to extend the These mutations in the backend. If there are no such mutation in backend(and there aren't in this case) we want to create one
-        ToggleCartHidden: Boolean!,
-        AddItemToCart(item: Item!): [Item]!, #array exits but inside it, there can or can't be items
-        RmoveItemFromCart(item: Item!): [Item]!,
-        ClearItemFromCart(item: Item!): [Item]!,
-        CartTotal: Int!,
+        ToggleCartHidden: Boolean!
+        AddItemToCart(item: Item!): [Item]! #array exits but inside it, there can or can't be items
+        RmoveItemFromCart(item: Item!): [Item]!
+        ClearItemFromCart(item: Item!): [Item]!
+        CartTotal: Int!
+        SetCurrentUser(user: User!): User!
     }
 `;
 
@@ -35,6 +44,12 @@ const GET_CART_ITEMS = gql`
 const GET_CART_TOTAL = gql`
     {
         cartTotal @client
+    }
+`;
+
+const GET_CURRENT_USER = gql`
+    {
+        currentUser @client
     }
 `;
 
@@ -132,5 +147,14 @@ export const resolvers = { //this function is called resolver because it fetch t
 
             return newCartItems;
         },
+
+        setCurrentUser: (_root, {user}, {cache}) => {
+            cache.writeQuery({
+                query: GET_CURRENT_USER,
+                data: { currentUser: user}
+            });
+
+            return user;
+        }
     }
 };
