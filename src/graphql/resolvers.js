@@ -1,5 +1,5 @@
-import { gql } from 'apollo-boost';
-import {addItemToCart} from "./cart.utils";
+import {gql} from 'apollo-boost';
+import {addItemToCart, getCartItemCount, getCartTotal, removeItemFromCart} from "./cart.utils";
 
 export const typeDefs = gql` # we're defining the mutation type we want to use
     extend type Item { # item query is already exists ,so, this won't create a new one like below
@@ -7,7 +7,10 @@ export const typeDefs = gql` # we're defining the mutation type we want to use
     }
     extend type Mutation { # this means that we want to extend the These mutations in the backend. If there are no such mutation in backend(and there aren't in this case) we want to create one
         ToggleCartHidden: Boolean!,
-        AddItemToCart(item: Item!): [Item]! #array exits but inside it, there can or can't be items
+        AddItemToCart(item: Item!): [Item]!, #array exits but inside it, there can or can't be items
+        RmoveItemFromCart(item: Item!): [Item]!,
+        ClearItemFromCart(item: Item!): [Item]!,
+        CartTotal: Int!,
     }
 `;
 
@@ -17,9 +20,21 @@ const GET_CART_HIDDEN = gql`
     }
 `;
 
+const GET_ITEMS_COUNT = gql`
+    {
+        itemCount @client
+    }
+`;
+
 const GET_CART_ITEMS = gql`
     {
         cartItems @client
+    }
+`;
+
+const GET_CART_TOTAL = gql`
+    {
+        cartTotal @client
     }
 `;
 
@@ -47,9 +62,19 @@ export const resolvers = { //this function is called resolver because it fetch t
                 query: GET_CART_ITEMS
             });
 
-            console.log(cartItems);
+            //console.log(cartItems);
 
             const newCartItems = addItemToCart(cartItems, item); //item will be the one we got from argument we inserted when we use this function
+
+            cache.writeQuery({
+                query: GET_ITEMS_COUNT,
+                data: {itemCount: getCartItemCount(newCartItems)}
+            });
+
+            cache.writeQuery({
+                query: GET_CART_TOTAL,
+                data: {cartTotal: getCartTotal(newCartItems)}
+            });
 
             cache.writeQuery({
                 query: GET_CART_ITEMS,
@@ -57,6 +82,55 @@ export const resolvers = { //this function is called resolver because it fetch t
             });
 
             return newCartItems;
-        }
+        },
+        removeItemFromCart: (_root, { item }, { cache }, _info) => {
+            const { cartItems } = cache.readQuery({
+                query: GET_CART_ITEMS
+            });
+
+            const newCartItems = removeItemFromCart(cartItems, item);
+
+            cache.writeQuery({
+                query: GET_ITEMS_COUNT,
+                data: {itemCount: getCartItemCount(newCartItems)}
+            });
+
+            cache.writeQuery({
+                query: GET_CART_TOTAL,
+                data: {cartTotal: getCartTotal(newCartItems)}
+            });
+
+            cache.writeQuery({
+                query: GET_CART_ITEMS,
+                data: { cartItems: newCartItems }
+            });
+
+            return newCartItems;
+        },
+        clearItemFromCart: (_root, { item }, { cache }) => {
+            const { cartItems } = cache.readQuery({
+                query: GET_CART_ITEMS
+            });
+            const newCartItems = cartItems.filter(
+                cartItem => cartItem.id !== item.id
+            );
+
+            cache.writeQuery({
+                query: GET_ITEMS_COUNT,
+                data: {itemCount: getCartItemCount(newCartItems)}
+            });
+
+            cache.writeQuery({
+                query: GET_CART_TOTAL,
+                data: {cartTotal: getCartTotal(newCartItems)}
+            });
+
+            cache.writeQuery({
+                query: GET_CART_ITEMS,
+                data: { cartItems: newCartItems }
+            });
+
+            return newCartItems;
+        },
     }
 };

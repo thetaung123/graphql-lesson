@@ -7,7 +7,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { ApolloProvider } from 'react-apollo';
 import { createHttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloClient, gql } from 'apollo-boost'; //we only installed apollo-boost and react-apollo but we are able to use other libraries like apollo-http-link because they're bundled with apollo-boost
+import { ApolloClient } from 'apollo-boost'; //we only installed apollo-boost and react-apollo but we are able to use other libraries like apollo-http-link because they're bundled with apollo-boost
 
 import { store, persistor } from './redux/store';
 
@@ -31,8 +31,11 @@ const client = new ApolloClient({
 
 client.writeData({
     data: { //setting up initial data // like creating reducer //we can change this data with mutations
+        currentUser: null,
         cartHidden: true,
-        cartItems: []
+        cartItems: [],
+        itemCount: 0,
+        cartTotal: 0
     }
 });
 //client has query and mutation functions to use
