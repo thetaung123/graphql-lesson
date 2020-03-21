@@ -6,6 +6,11 @@ export const typeDefs = gql` # we're defining the mutation type we want to use
         quantitiy: Int  #integer value
     }
 
+    extend type DateTime { # for createdAt property of User type // firebase return DateTime props with nanoseconds and second properties insidie createdAt // see the console.log from setCurrentUser for details
+        nanoseconds: Int!
+        seconds: Int!
+    }
+
     extend type User {
         id: ID!
         displayName: String!
@@ -148,12 +153,15 @@ export const resolvers = { //this function is called resolver because it fetch t
             return newCartItems;
         },
 
-        setCurrentUser: (_root, {user}, {cache}) => {
+        setCurrentUser: (_root, {user}, {cache}) => { //we're passing a big userAuth object from firebase but the way we set the User it'll only store four properties, id, displayName, createdAt, email
             cache.writeQuery({
                 query: GET_CURRENT_USER,
                 data: { currentUser: user}
             });
 
+            // console.log(cache.readQuery({
+            //     query: GET_CURRENT_USER
+            // }))
             return user;
         }
     }
